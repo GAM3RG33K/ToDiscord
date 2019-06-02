@@ -1,6 +1,6 @@
 {
   "extensionName": {
-    "message": "To Discord",
+    "message": "To Discord (Alpha)",
     "description": "Name of the extension."
   },
   "extensionDescription": {
@@ -8,7 +8,11 @@
     "description": "Description of the add-on."
   },
   "menuItemSendToDiscord": {
-    "message": "Send to discord #General",
+    "message": "Send to discord #General (Alpha)",
     "description": "Title of context menu item that sends the selection/link to discord when clicked."
+  },
+  "discordWebHookUrl": {
+    "message": "https://discordapp.com/api/webhooks/584252934443761677/bGosncVaIN78i7EYDko7L3lbsnH1mVX2Zz86pxYDETV6tR4TWsPGgLaXEPBgB6JWXUtT",
+    "description": "Url of the webhook to forward the content"
   }
 }

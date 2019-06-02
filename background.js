@@ -1,5 +1,4 @@
-const discordWebHookUrl = 'https://discordapp.com/api/webhooks/584252934443761677/bGosncVaIN78i7EYDko7L3lbsnH1mVX2Zz86pxYDETV6tR4TWsPGgLaXEPBgB6JWXUtT';
-
+const discordWebHookUrl = browser.i18n.getMessage("discordWebHookUrl");
 function send(content) {
     //verify and replace empty content
     content = content || "Hello World!";
