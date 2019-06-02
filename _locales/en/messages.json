@@ -1,0 +1,14 @@
+{
+  "extensionName": {
+    "message": "To Discord",
+    "description": "Name of the extension."
+  },
+  "extensionDescription": {
+    "message": "Sends selected text or link to discord channel #General",
+    "description": "Description of the add-on."
+  },
+  "menuItemSendToDiscord": {
+    "message": "Send to discord #General",
+    "description": "Title of context menu item that sends the selection/link to discord when clicked."
+  }
+}
