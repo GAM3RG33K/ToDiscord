@@ -1,0 +1,4 @@
+web-ext-artifacts/*
+node_modules/*
+*.web-extension-id
+package-lock.json
