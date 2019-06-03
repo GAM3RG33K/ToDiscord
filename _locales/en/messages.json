@@ -7,12 +7,20 @@
     "message": "Sends selected text or link to discord channel #General",
     "description": "Description of the add-on."
   },
-  "menuItemSendToDiscord": {
-    "message": "Send to discord #General (Alpha)",
+  "menuItemSendToDiscordChannel": {
+    "message": "to #General",
     "description": "Title of context menu item that sends the selection/link to discord when clicked."
   },
-  "discordWebHookUrl": {
+  "channelWebHookUrl": {
     "message": "https://discordapp.com/api/webhooks/584252934443761677/bGosncVaIN78i7EYDko7L3lbsnH1mVX2Zz86pxYDETV6tR4TWsPGgLaXEPBgB6JWXUtT",
+    "description": "Url of the webhook to forward the content"
+  },
+  "menuItemSendToMe": {
+    "message": "to @Me",
+    "description": "Title of context menu item that sends the selection/link to discord when clicked."
+  },
+  "discordMyUrl": {
+    "message": "https://discordapp.com/api/webhooks/584993375699206152/XRPZnUV3cgLvUgTmXVjlli2Jr_SsJHHBPOH_WhJql1i5_i-KQXkdqeWjdufIs873wdh_",
     "description": "Url of the webhook to forward the content"
   }
 }

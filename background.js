@@ -1,5 +1,6 @@
-const discordWebHookUrl = browser.i18n.getMessage("discordWebHookUrl");
-function send(content) {
+const channelWebhookUrl = browser.i18n.getMessage("channelWebHookUrl");
+const myWebhookUrl = browser.i18n.getMessage("discordMyUrl");
+function send(url, content) {
     //verify and replace empty content
     content = content || "Hello World!";
 
@@ -11,7 +12,7 @@ function send(content) {
 
     //send request to discord webhook
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", discordWebHookUrl, true);
+    xhr.open("POST", url, true);
     xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
     xhr.send(jsonData);
 
@@ -53,8 +54,14 @@ function onError(error) {
 Create all the context menu items.
 */
 browser.menus.create({
-    id: "send_to_discord",
-    title: browser.i18n.getMessage("menuItemSendToDiscord"),
+    id: "send_to_discord_channel",
+    title: browser.i18n.getMessage("menuItemSendToDiscordChannel"),
+    contexts: ["selection", "link"]
+}, onCreated);
+
+browser.menus.create({
+    id: "send_to_discord_me",
+    title: browser.i18n.getMessage("menuItemSendToMe"),
     contexts: ["selection", "link"]
 }, onCreated);
 
@@ -64,9 +71,13 @@ ID of the menu item that was clicked.
 */
 browser.menus.onClicked.addListener((info, tab) => {
     switch (info.menuItemId) {
-        case "send_to_discord":
+        case "send_to_discord_channel":
             var data = info.linkUrl != null ? info.linkUrl : info.selectionText;
-            send(data);
+            send(channelWebhookUrl, data);
+            break;
+        case "send_to_discord_me":
+            var data = info.linkUrl != null ? info.linkUrl : info.selectionText;
+            send(myWebhookUrl, data);
             break;
     }
 });
