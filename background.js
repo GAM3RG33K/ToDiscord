@@ -141,7 +141,7 @@ function openOptionsPage() {
 }
 
 /**
- * This method will be called when the extention has been loaded for the first time
+ * This method will be called when the extension has been loaded for the first time
  *  in current browser session.
  */
 function initValues() {
@@ -154,5 +154,5 @@ function initValues() {
 
 //listen for the event to start the initial process of the page
 document.addEventListener("DOMContentLoaded", initValues);
-//redirect user to options page on click of the extention icon.
+//redirect user to options page on click of the extension icon.
 browser.browserAction.onClicked.addListener(openOptionsPage);

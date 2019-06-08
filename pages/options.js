@@ -47,7 +47,7 @@ function storeMap(map) {
     //store the urls in storage
     browser.storage.local.set({ url_map: map });
 
-    //reload the extention to apply the changes made by user.
+    //reload the extension to apply the changes made by user.
     browser.runtime.reload();
 }
 

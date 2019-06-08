@@ -1,0 +1,11 @@
+General: https://discordapp.com/api/webhooks/584252934443761677/bGosncVaIN78i7EYDko7L3lbsnH1mVX2Zz86pxYDETV6tR4TWsPGgLaXEPBgB6JWXUtT
+Me: https://discordapp.com/api/webhooks/584993375699206152/XRPZnUV3cgLvUgTmXVjlli2Jr_SsJHHBPOH_WhJql1i5_i-KQXkdqeWjdufIs873wdh_
+
+Api credentials:
+https://addons.mozilla.org/en-US/developers/addon/api/key/
+
+web-ext help:
+https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/web-ext_command_reference#web-ext_sign
+
+command:
+web-ext sign --api-key key --api-secret secret --channel unlisted
