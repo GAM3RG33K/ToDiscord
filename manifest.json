@@ -32,5 +32,10 @@
             "32": "icons/ext_icon_32.png",
             "40": "icons/ext_icon_40.png"
         }
+    },
+    "options_ui": {
+        "open_in_tab": true,
+        "browser_style": true,
+        "page": "pages/options.html"
     }
 }

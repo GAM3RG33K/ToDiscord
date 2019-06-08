@@ -1,10 +1,26 @@
-const channelWebhookUrl = browser.i18n.getMessage("channelWebHookUrl");
-const myWebhookUrl = browser.i18n.getMessage("discordMyUrl");
+//this is prefix string for menu item title
+const menuTitlePrefix = browser.i18n.getMessage("menuTitlePrefix");
+
+//this is the storage for urls
+var urlMap;
+
+/**
+ * This method sends given content(tab url, link or selected text) 
+ * to given url.
+ * 
+ * Note: The url must be of the dicord webhook only.
+ * @param {String} url 
+ * @param {TabInfo} info 
+ * @param {Tab} tab 
+ */
 function send(url, info, tab) {
-    //verify and replace empty content
-    //content = content || "Hello World!";
+    print('discord url: ' + url);
+
+    //check the content, if it is selected text or a link
     var data = info.linkUrl != null ? info.linkUrl : info.selectionText;
+    //check if the user has not clicked any link or selected any text
     data = data || tab.url;
+
     //create a json from the data
     var jsonData = JSON.stringify({
         "content": data,
@@ -19,67 +35,124 @@ function send(url, info, tab) {
 
     //read and log the response
     var response = xhr.response;
-    console.log("Discord Response: " + response);
-
+    print("Discord Response: " + response);
 }
 
-/*
-Called when the item has been created, or when creation failed due to an error.
-We'll just log success/failure here.
+/** 
+ * Called when the item has been created, or when creation failed due to an error.
+ * 
+ * We'll just log success/failure here.
+ * 
 */
 function onCreated() {
     if (browser.runtime.lastError) {
-        console.log(`Error: ${browser.runtime.lastError}`);
+        print(`Error: ${browser.runtime.lastError}`);
     } else {
-        console.log("Item created successfully");
+        print("Item created successfully");
     }
 }
 
-/*
-Called when the url has been set in storage.
-We'll just log success here.
+/**
+ * Called when the url has been set in storage.
+ * 
+ * We'll just log success here.
 */
 function onSuccess() {
-    console.log("Url set successfully");
+    print("Url set successfully");
 }
 
-/*
-Called when there was an error.
-We'll just log the error here.
+/**
+ * Called when there was an error.
+ * 
+ * We'll just log the error here.
 */
 function onError(error) {
-    console.log(`Error: ${error}`);
+    print(`Error: ${error}`);
 }
 
-/*
-Create all the context menu items.
-*/
-browser.menus.create({
-    id: "send_to_discord_channel",
-    title: browser.i18n.getMessage("menuItemSendToDiscordChannel"),
-    //contexts: ["selection", "link"]
-    contexts: ["all"]
-}, onCreated);
 
-browser.menus.create({
-    id: "send_to_discord_me",
-    title: browser.i18n.getMessage("menuItemSendToMe"),
-    //contexts: ["selection", "link"]
-    contexts: ["all"]
-}, onCreated);
+/**
+ * Create all the context menu items.
+ * 
+*/
+function generateMenuItems() {
+
+    //check if the in memory urlmap
+    if (urlMap != null
+        && typeof urlMap != 'undefined'
+        && urlMap.size > 0) {
+        print('urlMap:');
+        for (var [key, value] of urlMap) {
+            print(key + ' : ' + value);
+        }
+
+        //iterate over the map and create menu items accordingly
+        for (var [name, url] of urlMap) {
+            browser.menus.create({
+                id: name,
+                title: menuTitlePrefix + " " + name,
+                //this will allow the options pop up to be visible 
+                //When user has cursor on a link, a tab or anywhere in the page.
+                //Also When a text selection has been made.
+                contexts: ["link", "selection", "tab", "page"]
+            }, onCreated);
+        }
+    }
+    browser.menus.create({
+        id: "options",
+        title: browser.i18n.getMessage("menuTitleOptions"),
+        //this will allow the options pop up to be visible everywhere on the browser. 
+        contexts: ["all", "tab"]
+    }, onCreated);
+}
 
 /*
 The click event listener, where we perform the appropriate action given the
 ID of the menu item that was clicked.
 */
 browser.menus.onClicked.addListener((info, tab) => {
-    switch (info.menuItemId) {
-        case "send_to_discord_channel":
+    var menuItemId = "" + info.menuItemId;
+    if (urlMap != null && urlMap.size > 0) {
+        var url = urlMap.get(menuItemId);
+        if (url != null && typeof url != 'undefined') {
+            send(url, info, tab);
+        }
+    }
 
-            send(channelWebhookUrl, info, tab);
-            break;
-        case "send_to_discord_me":
-            send(myWebhookUrl, info, tab);
-            break;
+    if (menuItemId === "options") {
+        openOptionsPage();
     }
 });
+
+
+/**
+ * Print the message provided in the browser console
+ * @param {String} message
+ */
+function print(message) {
+    console.log(message);
+}
+
+/**
+ * This method will open the options page of the addon
+ */
+function openOptionsPage() {
+    browser.runtime.openOptionsPage();
+}
+
+/**
+ * This method will be called when the extention has been loaded for the first time
+ *  in current browser session.
+ */
+function initValues() {
+    browser.storage.local.get()
+        .then((settings) => {
+            urlMap = settings.url_map;
+            generateMenuItems();
+        });
+}
+
+//listen for the event to start the initial process of the page
+document.addEventListener("DOMContentLoaded", initValues);
+//redirect user to options page on click of the extention icon.
+browser.browserAction.onClicked.addListener(openOptionsPage);

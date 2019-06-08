@@ -1,0 +1,17 @@
+.button-control {
+    cursor: default;
+    margin-top: 0;
+    margin-bottom: 0;
+    min-height: auto;
+    min-width: auto;
+    padding: 2px 4px;
+    background: dodgerblue;
+    color: whitesmoke;
+}
+.input-control {
+    cursor: default;
+    margin: 5;
+    min-height: auto;
+    min-width: auto;
+    padding: 2px 4px;
+}
