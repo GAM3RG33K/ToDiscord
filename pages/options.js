@@ -71,7 +71,7 @@ function generateURLInputElement(count, url) {
     var urlInput = document.createElement("input");
     urlInput.id = "url_" + count;
     urlInput.placeholder = "URL";
-    urlInput.className = "input_control";
+    urlInput.className = "field-style";
     urlInput.setAttribute('value', "" + url);
     return urlInput;
 }
@@ -89,7 +89,7 @@ function generateNameInputElement(count, name) {
     var nameInput = document.createElement("input");
     nameInput.id = "name_" + count;
     nameInput.placeholder = "Name";
-    nameInput.className = "input_control";
+    nameInput.className = "field-style";
     nameInput.setAttribute('value', "" + name);
     return nameInput;
 }
