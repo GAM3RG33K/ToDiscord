@@ -158,8 +158,9 @@ function updateUI(urlMap) {
         for (var [name, url] of urlMap) {
             addUrlSpan(name, url);
         }
+    } else {
+        addUrlSpan('', '');
     }
-
 }
 
 /**
