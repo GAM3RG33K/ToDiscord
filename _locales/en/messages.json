@@ -1,10 +1,10 @@
 {
   "extensionName": {
-    "message": "To Discord (Alpha)",
+    "message": "To Discord",
     "description": "Name of the extension."
   },
   "extensionDescription": {
-    "message": "Sends selected text or link to discord channel #General",
+    "message": "Sends content to added discord channels",
     "description": "Description of the add-on."
   },
   "menuTitlePrefix": {
