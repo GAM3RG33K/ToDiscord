@@ -1,7 +1,7 @@
 {
     "manifest_version": 2,
-    "version": "2.0.1",
-    "name": "To Discord 2.0.1",
+    "version": "2.0.0",
+    "name": "To Discord 2.0",
     "description": "Sends content to added discord channels",
     "default_locale": "en",
     "background": {

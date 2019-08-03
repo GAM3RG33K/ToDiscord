@@ -1,8 +1,241 @@
+function isChromeBrowser() {
+    var objAgent = navigator.userAgent
+    if(objAgent.indexOf("Chrome") !=-1){
+        return true;
+    } else {
+        return false;
+    }
+}
+const isChrome = isChromeBrowser();
+const browserAPI = isChrome ? chrome : browser;
+const menus = isChrome ? browserAPI.contextMenus : browserAPI.menus;
+const runtime = browserAPI.runtime;
+const storage = browserAPI.storage;
+const browserAction = browserAPI.browserAction;
+const i18n = browserAPI.i18n;
+
+const urlMapKey = 'url_map';
+
 //this is prefix string for menu item title
-const menuTitlePrefix = browser.i18n.getMessage("menuTitlePrefix");
+const menuTitlePrefix = getMessage("menuTitlePrefix");
 
 //this is the storage for urls
 var urlMap;
+
+/**
+ * 
+ * Methods for accessing browser APIs
+ * 
+*/
+
+//get data from the storage
+function getDataFromStorage(key, callBack) {
+    print('get key: ' + key);
+    if (isChrome) {
+        storage.local.get(null, 
+            function (storagePrefs) {								 
+            var value = storagePrefs[key];
+            if (typeof (value) == 'undefined') {
+                value = '{}';
+            }
+            callBack(jsonToMap(value));
+        });
+    } else {
+        storage.local.get()
+            .then((storagePrefs) => {
+                var value = storagePrefs[key];
+                if (typeof (value) == 'undefined') {
+                    value = '{}';
+                }
+                callBack(jsonToMap(value));
+            });
+    }
+
+}
+
+//set data to storage
+function setDataInStorage(key, value, callBack) {
+    print('mapKey/value: ' + key + "/" + value);
+    var storagePrefs = {};
+    storagePrefs[key] = mapToJson(value);
+
+    if (isChrome) {
+        storage.local.set(storagePrefs, callBack);
+    } else {
+        storage.local.set(storagePrefs)
+            .then(function(item){
+                callBack();
+            });
+    }
+}
+
+// get message string from the message json
+function getMessage(messageKey) {
+    return i18n.getMessage(messageKey);
+}
+
+//add a context menu item
+function createMenuItem(itemProperties, callBack) {
+    menus.create(itemProperties, callBack);
+}
+
+//add click listener for context menu items
+function addMenuItemClickListener(callBack) {
+    menus.onClicked.addListener(callBack);
+}
+
+// add click listener for extension icon on tool bar
+function addIconClickListener(callBack) {
+    browserAction.onClicked.addListener(callBack);
+}
+
+
+/**
+ * This method will open the options page of the addon
+ */
+function openOptionsPage() {
+    runtime.openOptionsPage();
+}
+
+
+/**
+ * Utility methods with pure javascript code
+ */
+function strMapToObj(strMap) {
+    let obj = Object.create(null);
+    for (let [k, v] of strMap) {
+        obj[k] = v;
+    }
+    return obj;
+}
+function objToStrMap(obj) {
+    let strMap = new Map();
+    for (let k of Object.keys(obj)) {
+        strMap.set(k, obj[k]);
+    }
+    return strMap;
+}
+
+function mapToJson(strMap) {
+    return JSON.stringify(strMapToObj(strMap));
+}
+function jsonToMap(jsonStr) {
+    return objToStrMap(JSON.parse(jsonStr));
+}
+
+
+
+/**
+ * Call back methods for logging	
+ */
+
+/** 
+ * Called when the item has been created, or when creation failed due to an error.
+ * 
+ * We'll just log success/failure here.
+ * 
+*/
+function onCreated() {
+    if (runtime.lastError) {
+        print(`Error: ${runtime.lastError}`);
+    } else {
+        print("Item created successfully");
+    }
+}
+
+/**
+ * Called when the url has been set in storage.
+ * 
+ * We'll just log success here.
+*/
+function onSuccess() {
+    print("Url set successfully");
+}
+
+/**
+ * Called when there was an error.
+ * 
+ * We'll just log the error here.
+*/
+function onError(error) {
+    print(`Error: ${error}`);
+}
+
+/**
+ * Print the message provided in the browser console
+ * @param {String} message
+ */
+function print(message) {
+    console.log(message);
+}
+
+/**
+ * This method will be called when the extension has been loaded for the first time
+ *  in current browser session.
+ */
+function initValues() {
+    getDataFromStorage('url_map', function (map) {
+        urlMap = map;
+        console.log('urls from the storage: ' + map);
+        generateMenuItems();
+    });
+}
+
+
+/**
+ * Create all the context menu items.
+ * 
+*/
+function generateMenuItems() {
+
+    //check if the in memory urlmap
+    if (urlMap != null
+        && typeof urlMap != 'undefined'
+        && urlMap.size > 0) {
+        print('urlMap:');
+        for (var [key, value] of urlMap) {
+            print(key + ' : ' + value);
+        }
+
+        //iterate over the map and create menu items accordingly
+        for (var [name, url] of urlMap) {
+            createMenuItem({
+                id: name,
+                title: menuTitlePrefix + " " + name,
+                //this will allow the options pop up to be visible 
+                //When user has cursor on a link, a tab or anywhere in the page.
+                //Also When a text selection has been made.
+                contexts: ["link", "selection", "page", "image", "video", "audio",]
+            }, onCreated);
+        }
+    }
+    createMenuItem({
+        id: "options",
+        title: getMessage("menuTitleOptions"),
+        //this will allow the options pop up to be visible everywhere on the browser. 
+        contexts: ["all"]
+    }, onCreated);
+}
+
+/*
+The click event listener, where we perform the appropriate action given the
+ID of the menu item that was clicked.
+*/
+addMenuItemClickListener((info, tab) => {
+    var menuItemId = "" + info.menuItemId;
+    if (urlMap != null && urlMap.size > 0) {
+        var url = urlMap.get(menuItemId);
+        if (url != null && typeof url != 'undefined') {
+            send(url, info, tab);
+        }
+    }
+
+    if (menuItemId === "options") {
+        openOptionsPage();
+    }
+});
+
+
 
 /**
  * This method sends given content(tab url, link or selected text) 
@@ -38,121 +271,9 @@ function send(url, info, tab) {
     print("Discord Response: " + response);
 }
 
-/** 
- * Called when the item has been created, or when creation failed due to an error.
- * 
- * We'll just log success/failure here.
- * 
-*/
-function onCreated() {
-    if (browser.runtime.lastError) {
-        print(`Error: ${browser.runtime.lastError}`);
-    } else {
-        print("Item created successfully");
-    }
-}
 
-/**
- * Called when the url has been set in storage.
- * 
- * We'll just log success here.
-*/
-function onSuccess() {
-    print("Url set successfully");
-}
-
-/**
- * Called when there was an error.
- * 
- * We'll just log the error here.
-*/
-function onError(error) {
-    print(`Error: ${error}`);
-}
-
-
-/**
- * Create all the context menu items.
- * 
-*/
-function generateMenuItems() {
-
-    //check if the in memory urlmap
-    if (urlMap != null
-        && typeof urlMap != 'undefined'
-        && urlMap.size > 0) {
-        print('urlMap:');
-        for (var [key, value] of urlMap) {
-            print(key + ' : ' + value);
-        }
-
-        //iterate over the map and create menu items accordingly
-        for (var [name, url] of urlMap) {
-            browser.menus.create({
-                id: name,
-                title: menuTitlePrefix + " " + name,
-                //this will allow the options pop up to be visible 
-                //When user has cursor on a link, a tab or anywhere in the page.
-                //Also When a text selection has been made.
-                contexts: ["link", "selection", "tab", "page"]
-            }, onCreated);
-        }
-    }
-    browser.menus.create({
-        id: "options",
-        title: browser.i18n.getMessage("menuTitleOptions"),
-        //this will allow the options pop up to be visible everywhere on the browser. 
-        contexts: ["all", "tab"]
-    }, onCreated);
-}
-
-/*
-The click event listener, where we perform the appropriate action given the
-ID of the menu item that was clicked.
-*/
-browser.menus.onClicked.addListener((info, tab) => {
-    var menuItemId = "" + info.menuItemId;
-    if (urlMap != null && urlMap.size > 0) {
-        var url = urlMap.get(menuItemId);
-        if (url != null && typeof url != 'undefined') {
-            send(url, info, tab);
-        }
-    }
-
-    if (menuItemId === "options") {
-        openOptionsPage();
-    }
-});
-
-
-/**
- * Print the message provided in the browser console
- * @param {String} message
- */
-function print(message) {
-    console.log(message);
-}
-
-/**
- * This method will open the options page of the addon
- */
-function openOptionsPage() {
-    browser.runtime.openOptionsPage();
-}
-
-/**
- * This method will be called when the extension has been loaded for the first time
- *  in current browser session.
- */
-function initValues() {
-    browser.storage.local.get()
-        .then((settings) => {
-            urlMap = settings.url_map;
-            generateMenuItems();
-        });
-}
 
 //listen for the event to start the initial process of the page
 document.addEventListener("DOMContentLoaded", initValues);
 //redirect user to options page on click of the extension icon.
-browser.browserAction.onClicked.addListener(openOptionsPage);
+addIconClickListener(openOptionsPage);

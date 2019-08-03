@@ -1,12 +1,4 @@
 {
-  "extensionName": {
-    "message": "To Discord 2.0",
-    "description": "Name of the extension."
-  },
-  "extensionDescription": {
-    "message": "Sends content to added discord channels",
-    "description": "Description of the add-on."
-  },
   "menuTitlePrefix": {
     "message": "to ",
     "description": "Prefix of Title for all context menu item"

@@ -1,3 +1,16 @@
+function isChromeBrowser() {
+    var objAgent = navigator.userAgent
+    if(objAgent.indexOf("Chrome") !=-1){
+        return true;
+    } else {
+        return false;
+    }
+}
+const isChrome = isChromeBrowser();
+const browserAPI = isChrome ? chrome : browser;
+const runtime = browserAPI.runtime;
+const storage = browserAPI.storage;
+
 //the list view element in the page
 const listView = document.querySelector('#div_url_list');
 //the button to add a url field
@@ -10,16 +23,123 @@ const saveButton = document.querySelector('#btn_save');
 //this count helps access and maintain order of the visible elements which contains urls
 var count = 0;
 
+
+const urlMapKey = 'url_map';
 var urlMap;
+/**
+ * 
+ * Methods for accessing browser APIs
+ * 
+*/
+
+//get data from the storage
+function getDataFromStorage(key, callBack) {
+    print('get key: ' + key);
+    if (isChrome) {
+        storage.local.get(null, 
+            function (storagePrefs) {								 
+            var value = storagePrefs[key];
+            if (typeof (value) == 'undefined') {
+                value = '{}';
+            }
+            callBack(jsonToMap(value));
+        });
+    } else {
+        storage.local.get()
+            .then((storagePrefs) => {
+                var value = storagePrefs[key];
+                if (typeof (value) == 'undefined') {
+                    value = '{}';
+                }
+                callBack(jsonToMap(value));
+            });
+    }
+
+}
+
+//set data to storage
+function setDataInStorage(key, value, callBack) {
+    print('mapKey/value: ' + key + "/" + value);
+    var storagePrefs = {};
+    storagePrefs[key] = mapToJson(value);
+
+    if (isChrome) {
+        storage.local.set(storagePrefs, callBack);
+    } else {
+        storage.local.set(storagePrefs)
+            .then(function(item){
+                callBack();
+            });
+    }
+}
+
+
+/**
+ * Utility methods with pure javascript code
+ */
+function strMapToObj(strMap) {
+    let obj = Object.create(null);
+    for (let [k, v] of strMap) {
+        obj[k] = v;
+    }
+    return obj;
+}
+function objToStrMap(obj) {
+    let strMap = new Map();
+    for (let k of Object.keys(obj)) {
+        strMap.set(k, obj[k]);
+    }
+    return strMap;
+}
+
+function mapToJson(strMap) {
+    return JSON.stringify(strMapToObj(strMap));
+}
+function jsonToMap(jsonStr) {
+    return objToStrMap(JSON.parse(jsonStr));
+}
+
+/**
+ * This method will check if the given string is empty or not
+ * @param {String} string 
+ */
+function isEmpty(string) {
+    return (string.length === 0 || !string.trim());
+}
+
+
+
+/**
+ * Call back methods for logging	
+ */
+
+/**
+ * Called when there was an error.
+ * 
+ * We'll just log the error here.
+*/
+function onError(error) {
+    print(`Error: ${error}`);
+}
+
+/**
+ * Print the message provided in the browser console
+ * @param {String} message
+ */
+function print(message) {
+    console.log(message);
+}
+
 /**
  * This method is called initially when the addon options page is loaded
  * 
  * it fetches the urls from the storage
  */
 function initPreference() {
-    browser.storage.local.get()
-        .then((settings) => {
-            urlMap = settings.url_map;
+    getDataFromStorage(urlMapKey, function (map) {
+        {
+
+            urlMap = map;
             if (urlMap == null
                 || urlMap.size == 0) {
                 print('nothing in storage, adding current map!');
@@ -34,7 +154,9 @@ function initPreference() {
 
             //update UI based on the urlMap that was fetched from the storage
             updateUI(urlMap);
-        });
+        }
+
+    });
 }
 
 
@@ -45,19 +167,15 @@ function initPreference() {
 function storeMap(map) {
 
     //store the urls in storage
-    browser.storage.local.set({ url_map: map });
+    setDataInStorage(urlMapKey, map, function () {
+        console.log('values updated!! ' + map);
 
-    //reload the extension to apply the changes made by user.
-    browser.runtime.reload();
+        //reload the extension to apply the changes made by user.
+        runtime.reload();
+    });
 }
 
-/**
- * Print the message provided in the browser console
- * @param {String} message 
- */
-function print(message) {
-    console.log(message);
-}
+
 
 /**
  * This method generates and returns an Input field with
@@ -203,13 +321,6 @@ function saveUrls() {
     storeMap(urlMap);
 }
 
-/**
- * This method will check if the given string is empty or not
- * @param {String} string 
- */
-function isEmpty(string) {
-    return (string.length === 0 || !string.trim());
-}
 
 //listen for the event to start the initial process of the page
 document.addEventListener("DOMContentLoaded", initPreference);

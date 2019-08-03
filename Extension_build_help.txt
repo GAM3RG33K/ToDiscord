@@ -1,3 +1,5 @@
+For Firefox:
+
 Api credentials:
 https://addons.mozilla.org/en-US/developers/addon/api/key/
 
@@ -6,3 +8,7 @@ https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/web-ext_c
 
 command:
 web-ext sign --api-key key --api-secret secret --channel unlisted
+
+
+
+For Chrome:
