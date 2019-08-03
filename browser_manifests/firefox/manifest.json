@@ -1,24 +1,14 @@
 {
     "manifest_version": 2,
-    "name": "__MSG_extensionName__",
-    "description": "__MSG_extensionDescription__",
-    "version": "2.0.0",
+    "version": "2.0.1",
+    "name": "To Discord 2.0.1",
+    "description": "Sends content to added discord channels",
     "default_locale": "en",
-    "applications": {
-        "gecko": {
-            "id": "toDiscord2@happyworks.com"
-        }
-    },
     "background": {
         "scripts": [
             "background.js"
         ]
     },
-    "permissions": [
-        "activeTab",
-        "menus",
-        "storage"
-    ],
     "icons": {
         "16": "icons/ext_icon_16.png",
         "20": "icons/ext_icon_20.png",
@@ -33,6 +23,16 @@
             "40": "icons/ext_icon_40.png"
         }
     },
+    "applications": {
+        "gecko": {
+            "id": "toDiscord2@happyworks.com"
+        }
+    },
+    "permissions": [
+        "activeTab",
+        "menus",
+        "storage"
+    ],
     "options_ui": {
         "open_in_tab": true,
         "browser_style": true,

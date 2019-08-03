@@ -1,0 +1,35 @@
+{
+    "manifest_version": 2,
+    "version": "2.0.1",
+    "name": "To Discord 2.0.1",
+    "description": "Sends content to added discord channels",
+    "default_locale": "en",
+    "background": {
+        "scripts": [
+            "background.js"
+        ]
+    },
+    "icons": {
+        "16": "icons/ext_icon_16.png",
+        "20": "icons/ext_icon_20.png",
+        "32": "icons/ext_icon_32.png",
+        "40": "icons/ext_icon_40.png"
+    },
+    "browser_action": {
+        "default_icon": {
+            "16": "icons/ext_icon_16.png",
+            "20": "icons/ext_icon_20.png",
+            "32": "icons/ext_icon_32.png",
+            "40": "icons/ext_icon_40.png"
+        }
+    },
+    "permissions": [
+        "activeTab",
+        "contextMenus",
+        "storage"
+    ],
+    "options_ui": {
+        "open_in_tab": true,
+        "page": "pages/options.html"
+    }
+}
