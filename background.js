@@ -32,7 +32,7 @@ var urlMap;
 function getDataFromStorage(key, callBack) {
     print('get key: ' + key);
     if (isChrome) {
-        storage.local.get(null, 
+        storage.sync.get(null, 
             function (storagePrefs) {								 
             var value = storagePrefs[key];
             if (typeof (value) == 'undefined') {
@@ -41,7 +41,7 @@ function getDataFromStorage(key, callBack) {
             callBack(jsonToMap(value));
         });
     } else {
-        storage.local.get()
+        storage.sync.get()
             .then((storagePrefs) => {
                 var value = storagePrefs[key];
                 if (typeof (value) == 'undefined') {
@@ -60,9 +60,9 @@ function setDataInStorage(key, value, callBack) {
     storagePrefs[key] = mapToJson(value);
 
     if (isChrome) {
-        storage.local.set(storagePrefs, callBack);
+        storage.sync.set(storagePrefs, callBack);
     } else {
-        storage.local.set(storagePrefs)
+        storage.sync.set(storagePrefs)
             .then(function(item){
                 callBack();
             });
