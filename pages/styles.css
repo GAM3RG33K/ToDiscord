@@ -1,59 +1,48 @@
-.button-control {
-    cursor: default;
-    margin-top: 0;
-    margin-bottom: 0;
-    min-height: auto;
-    min-width: auto;
-    padding: 2px 4px;
-    background: dodgerblue;
-    color: whitesmoke;
+body {
+    font: 1.2em Arial, Helvetica, sans-serif;
 }
-.input-control {
-    cursor: default;
-    margin: 5;
-    min-height: auto;
-    min-width: auto;
-    padding: 2px 4px;
-}
-.container{
-	margin-top: 30px;
-	text-align: center;
-}
-.info{
-	margin-top: 30px;
-	border-top: 2px solid #B0CFE0;
-}
-.field-style{
-	box-sizing: border-box; 
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box; 
-	padding: 8px;
-	outline: none;
-	border: 1px solid #B0CFE0;
-	-webkit-transition: all 0.30s ease-in-out;
-	-moz-transition: all 0.30s ease-in-out;
-	-ms-transition: all 0.30s ease-in-out;
-	-o-transition: all 0.30s ease-in-out;
 
+.container {
+    margin-top: 30px;
+    text-align: center;
 }
-.field-style:focus{
-	box-shadow: 0 0 5px #B0CFE0;
-	border:1px solid #B0CFE0;
+
+.info {
+    font-size: 1.2em;
+    padding: 10vh 10vw;
+    margin-top: 30px;
+    border-top: 2px solid #B0CFE0;
 }
-.input-buttons{
-	-moz-box-shadow: inset 0px 1px 0px 0px #3985B1;
-	-webkit-box-shadow: inset 0px 1px 0px 0px #3985B1;
-	box-shadow: inset 0px 1px 0px 0px #3985B1;
-	background-color: #216288;
-	border: 1px solid #17445E;
-	display: inline-block;
-	cursor: pointer;
-	color: #FFFFFF;
-	padding: 8px 18px;
-	text-decoration: none;
-	font: 12px Arial, Helvetica, sans-serif;
+
+.field-style {
+    width: 40vw;
+    background: #0000010;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    padding: 1em 1.5em;
+    border: 1px solid #B0CFE0;
+    -webkit-transition: all 0.30s ease-in-out;
+    -moz-transition: all 0.30s ease-in-out;
+    -ms-transition: all 0.30s ease-in-out;
+    -o-transition: all 0.30s ease-in-out;
 }
-.input-buttons:hover{
-	background: linear-gradient(to bottom, #2D77A2 5%, #337DA8 100%);
-	background-color: #28739E;
+
+.field-style:focus {
+    background: #00000020;
+    box-shadow: 0 0 10px #B0CFE0;
+    border: 2px solid #B0CFE0;
+}
+
+.input-buttons {
+    background-color: #216288;
+    display: inline-block;
+    cursor: pointer;
+    color: #FFFFFF;
+    padding: 1em 1.5em;
+    text-decoration: none;
+}
+
+.input-buttons:hover {
+    background-color: rgb(71, 129, 163);
 }
