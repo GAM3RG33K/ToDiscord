@@ -1,6 +1,6 @@
 {
     "manifest_version": 2,
-    "version": "2.0.1",
+    "version": "2.0.2",
     "name": "To Discord",
     "description": "Sends content to added discord channels",
     "default_locale": "en",
@@ -31,7 +31,8 @@
     "permissions": [
         "activeTab",
         "menus",
-        "storage"
+        "storage",
+        "unlimitedStorage"
     ],
     "options_ui": {
         "open_in_tab": true,

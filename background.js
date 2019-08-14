@@ -1,6 +1,6 @@
 function isChromeBrowser() {
     var objAgent = navigator.userAgent
-    if(objAgent.indexOf("Chrome") !=-1){
+    if (objAgent.indexOf("Chrome") != -1) {
         return true;
     } else {
         return false;
@@ -13,6 +13,8 @@ const runtime = browserAPI.runtime;
 const storage = browserAPI.storage;
 const browserAction = browserAPI.browserAction;
 const i18n = browserAPI.i18n;
+const contextList = isChrome ? ["link", "selection", "page", "image", "video", "audio",] 
+: ["link", "selection", "page", "tab", "image", "video", "audio",];
 
 const urlMapKey = 'url_map';
 
@@ -32,14 +34,14 @@ var urlMap;
 function getDataFromStorage(key, callBack) {
     print('get key: ' + key);
     if (isChrome) {
-        storage.sync.get(null, 
-            function (storagePrefs) {								 
-            var value = storagePrefs[key];
-            if (typeof (value) == 'undefined') {
-                value = '{}';
-            }
-            callBack(jsonToMap(value));
-        });
+        storage.sync.get(null,
+            function (storagePrefs) {
+                var value = storagePrefs[key];
+                if (typeof (value) == 'undefined') {
+                    value = '{}';
+                }
+                callBack(jsonToMap(value));
+            });
     } else {
         storage.sync.get()
             .then((storagePrefs) => {
@@ -63,7 +65,7 @@ function setDataInStorage(key, value, callBack) {
         storage.sync.set(storagePrefs, callBack);
     } else {
         storage.sync.set(storagePrefs)
-            .then(function(item){
+            .then(function (item) {
                 callBack();
             });
     }
@@ -205,7 +207,7 @@ function generateMenuItems() {
                 //this will allow the options pop up to be visible 
                 //When user has cursor on a link, a tab or anywhere in the page.
                 //Also When a text selection has been made.
-                contexts: ["link", "selection", "page", "image", "video", "audio",]
+                contexts: contextList,
             }, onCreated);
         }
     }
