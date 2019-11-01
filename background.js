@@ -13,9 +13,10 @@ const runtime = browserAPI.runtime;
 const storage = browserAPI.storage;
 const browserAction = browserAPI.browserAction;
 const i18n = browserAPI.i18n;
-const contextList = isChrome ? ["link", "selection", "page", "image", "video", "audio",] 
-: ["link", "selection", "page", "tab", "image", "video", "audio",];
+const contextList = isChrome ? ["link", "selection", "page", "image", "video", "audio",]
+    : ["link", "selection", "page", "tab", "image", "video", "audio",];
 
+const URL_SEPARATOR = ";";
 const urlMapKey = 'url_map';
 
 //this is prefix string for menu item title
@@ -249,7 +250,6 @@ addMenuItemClickListener((info, tab) => {
  * @param {Tab} tab 
  */
 function send(url, info, tab) {
-    print('discord url: ' + url);
 
     //check the content, if it is selected text or a link
     var data = info.linkUrl != null ? info.linkUrl : info.selectionText;
@@ -262,6 +262,32 @@ function send(url, info, tab) {
         "ttl": false
     });
 
+    
+    //check if the url is for a broadcast
+    if (url.includes(URL_SEPARATOR)) {
+        //Get the list of channel for broadcast
+        var channels = url.split(URL_SEPARATOR);
+        var channel;
+        for (channel of channels) {
+            //send the data to channels one by one
+            executeRequest(channel, jsonData);
+        }
+    } else {
+        //send the data to url
+        executeRequest(url, jsonData);
+    }
+}
+
+
+/**
+ * This method sends given platform formatted json data 
+ * to given url.
+ * 
+ * @param {String} url 
+ * @param {String} jsonData 
+ */
+function executeRequest(url, jsonData) {
+    print('discord url: ' + url);
     //send request to discord webhook
     var xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
@@ -271,8 +297,8 @@ function send(url, info, tab) {
     //read and log the response
     var response = xhr.response;
     print("Discord Response: " + response);
+    return response;
 }
-
 
 
 //listen for the event to start the initial process of the page
