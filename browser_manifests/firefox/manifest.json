@@ -13,14 +13,18 @@
     "16": "icons/ext_icon_16.png",
     "20": "icons/ext_icon_20.png",
     "32": "icons/ext_icon_32.png",
-    "40": "icons/ext_icon_40.png"
+    "40": "icons/ext_icon_40.png",
+    "48": "icons/ext_icon_40.png",
+    "128": "icons/ext_icon_40.png"
   },
   "browser_action": {
     "default_icon": {
       "16": "icons/ext_icon_16.png",
       "20": "icons/ext_icon_20.png",
       "32": "icons/ext_icon_32.png",
-      "40": "icons/ext_icon_40.png"
+      "40": "icons/ext_icon_40.png",
+      "48": "icons/ext_icon_40.png",
+      "128": "icons/ext_icon_40.png"
     }
   },
   "applications": {
