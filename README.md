@@ -26,5 +26,19 @@ This is a browser extension for sending content to a Discord Channel's WebHook.
  * Choice for Multiple channels to send content to (Check right-click menu for options)
  * Support for broadcast to multiple channels by combining the channel urls with ';'.   
 
-**Note**: Discord icon used here is from [Discord Branding](https://discordapp.com/branding).
+## Screenshots:
+ *Firefox*
+ ![](/images/to_discord_firefox_settings.PNG?raw=true)
+ ![](/images/to_discord_firefox_share_demo.PNG?raw=true)
+ ![](/images/to_discord_firefox_shared_content.PNG?raw=true)
+ ![](/images/to_discord_firefox_share_demo2.PNG?raw=true)
+ ![](/images/to_discord_firefox_shared_content2.PNG?raw=true)
+ 
+ *Chrome*
+ ![](/images/to_discord_chrome_settings.jpg?raw=true)
+ ![](/images/to_discord_chrome_share_demo.jpg?raw=true)
+ ![](/images/to_discord_chrome_shared_content.jpg?raw=true)
+
+
+**Special Note**: Discord icon used here is from [Discord Branding](https://discordapp.com/branding).
 Thanks discord team for allowing me to use it.

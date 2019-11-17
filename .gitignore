@@ -3,3 +3,4 @@ node_modules/*
 *.web-extension-id
 package-lock.json
 *.bat
+/.idea/
