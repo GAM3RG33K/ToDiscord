@@ -5,7 +5,7 @@ This is a browser extension for sending content to a Discord Channel's WebHook.
 
 ## Download Extension:
 [![](https://addons.cdn.mozilla.net/static/img/addons-buttons/AMO-button_1.png)](https://addons.mozilla.org/en-US/firefox/addon/to-discord/)
-[![](https://developer.chrome.com/webstore/images/ChromeWebStore_Badge_v2_206x58.png)]()
+[![](https://developer.chrome.com/webstore/images/ChromeWebStore_Badge_v2_206x58.png)](https://chrome.google.com/webstore/detail/to-discord/epcihifbffodmnbbnjgancnlodhbkhcl)
     
 ## Content Share Support on Browsers:
  * Firefox: 
