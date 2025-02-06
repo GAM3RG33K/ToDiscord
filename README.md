@@ -24,6 +24,7 @@ A browser extension for sending content to Discord Channels via WebHooks. Compat
 * Cross-device channel synchronization (requires browser login)
 * Multiple channel support with right-click context menu
 * Broadcast support - send to multiple channels simultaneously using ';' separator
+* Import/Export your channels via json (Check Options page)
 
 ### Technical Features
 * Manifest V3 compatible

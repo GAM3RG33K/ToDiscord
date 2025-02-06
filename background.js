@@ -64,7 +64,7 @@ const urlMapKey = 'url_map';
 const menuTitlePrefix = getMessage("menuTitlePrefix");
 
 //this is the storage for urls
-var urlMap;
+let globalUrlMap = null; // Define at top level
 
 /**
  * 
@@ -266,7 +266,7 @@ function initContextMenu() {
         }
         
         // Set the global urlMap
-        window.urlMap = map;
+        globalUrlMap = map; // Use global variable instead of window
         
         // Clear existing menus first
         menus.removeAll(() => {
@@ -281,15 +281,32 @@ function initContextMenu() {
     });
 }
 
-// Initialize the extension
-document.addEventListener('DOMContentLoaded', () => {
+// Remove the DOMContentLoaded event listener and replace with direct initialization
+function initializeExtension() {
     logInfo('System', 'info', 'Extension initialized');
     // Clear existing menus first
     menus.removeAll(() => {
         // Then initialize context menus
         initContextMenu();
     });
-});
+}
+
+// For Chrome's service worker
+if (isChrome) {
+    // Service workers use the 'install' event
+    globalThis.addEventListener('install', (event) => {
+        logInfo('System', 'info', 'Service worker installed');
+        globalThis.skipWaiting(); // Use globalThis instead of self
+    });
+
+    globalThis.addEventListener('activate', (event) => {
+        logInfo('System', 'info', 'Service worker activated');
+        initializeExtension();
+    });
+} else {
+    // Firefox can use direct initialization
+    initializeExtension();
+}
 
 //redirect user to options page on click of the extension icon.
 addIconClickListener(openOptionsPage);
@@ -303,7 +320,7 @@ browserAPI.storage.sync.get(null, function(items) {
 // Add back the click handler and send functions with image support
 addMenuItemClickListener((info, tab) => {
     logInfo('System', 'info', 'Menu item clicked:', info.menuItemId);
-    logInfo('Storage', 'info', 'Current urlMap:', window.urlMap);
+    logInfo('Storage', 'info', 'Current urlMap:', globalUrlMap);
     logInfo('System', 'info', 'Click info:', info);
     
     ensureUrlMap((urlMap) => {
@@ -413,12 +430,42 @@ async function executeRequest(url, jsonData) {
 
 // Add a function to ensure urlMap is initialized
 function ensureUrlMap(callback) {
-    if (!window.urlMap) {
+    if (!globalUrlMap) {
         getDataFromStorage(urlMapKey, (map) => {
-            window.urlMap = map;
+            globalUrlMap = map;
             callback(map);
         });
     } else {
-        callback(window.urlMap);
+        callback(globalUrlMap);
     }
 }
+
+// Add storage change listener near the top of the file with other listeners
+browserAPI.storage.onChanged.addListener((changes, areaName) => {
+    logInfo('Storage', 'info', 'Storage changed:', { changes, areaName });
+    
+    // Check if our urlMap has changed
+    if (changes[urlMapKey]) {
+        logInfo('Storage', 'info', 'urlMap changed, reinitializing menus');
+        
+        // Get the new value
+        const newValue = changes[urlMapKey].newValue;
+        try {
+            // Parse and update global map
+            const newMap = jsonToMap(newValue);
+            globalUrlMap = newMap;
+            
+            // Reinitialize context menus
+            menus.removeAll(() => {
+                if (newMap.size > 0) {
+                    for (const [name, url] of newMap) {
+                        addMenuItem(name, url);
+                    }
+                }
+                addOptionsMenuItem();
+            });
+        } catch (error) {
+            logInfo('Storage', 'error', 'Error handling storage change:', error);
+        }
+    }
+});
