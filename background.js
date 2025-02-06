@@ -1,3 +1,44 @@
+const DEBUG = false; // Toggle this to enable/disable all logging
+
+/**
+ * Centralized logging function
+ * @param {string} category - Category of the log (e.g., 'Storage', 'Menu', 'Network')
+ * @param {string} type - Type of log ('info', 'warn', 'error')
+ * @param {string} message - Main log message
+ * @param {any} data - Optional data to log
+ */
+function logInfo(category, type = 'info', message, data = null) {
+    if (!DEBUG) return;
+
+    const timestamp = new Date().toISOString();
+    const prefix = `[${timestamp}] [${category}]`;
+
+    switch (type.toLowerCase()) {
+        case 'error':
+            if (data) {
+                console.error(prefix, message, data);
+            } else {
+                console.error(prefix, message);
+            }
+            break;
+        case 'warn':
+            if (data) {
+                console.warn(prefix, message, data);
+            } else {
+                console.warn(prefix, message);
+            }
+            break;
+        default:
+            if (data) {
+                console.log(prefix, message, data);
+            } else {
+                console.log(prefix, message);
+            }
+    }
+}
+
+logInfo('Background script loaded');
+
 function isChromeBrowser() {
     var objAgent = navigator.userAgent
     if (objAgent.indexOf("Chrome") != -1) {
@@ -33,32 +74,47 @@ var urlMap;
 
 //get data from the storage
 function getDataFromStorage(key, callBack) {
-    print('get key: ' + key);
+    logInfo('Storage', 'info', `Getting data for key: ${key}`);
     if (isChrome) {
         storage.sync.get(null,
             function (storagePrefs) {
-                var value = storagePrefs[key];
-                if (typeof (value) == 'undefined') {
-                    value = '{}';
+                try {
+                    var value = storagePrefs[key];
+                    logInfo('Storage', 'info', 'Raw storage value:', value);
+                    if (typeof (value) == 'undefined') {
+                        value = '{}';
+                    }
+                    const map = jsonToMap(value);
+                    logInfo('Storage', 'info', 'Parsed map:', map);
+                    callBack(map);
+                } catch (error) {
+                    logInfo('Storage', 'error', 'Error parsing storage data:', error);
+                    callBack(new Map());
                 }
-                callBack(jsonToMap(value));
             });
     } else {
         storage.sync.get()
             .then((storagePrefs) => {
-                var value = storagePrefs[key];
-                if (typeof (value) == 'undefined') {
-                    value = '{}';
+                try {
+                    var value = storagePrefs[key];
+                    logInfo('Storage', 'info', 'Raw storage value:', value);
+                    if (typeof (value) == 'undefined') {
+                        value = '{}';
+                    }
+                    const map = jsonToMap(value);
+                    logInfo('Storage', 'info', 'Parsed map:', map);
+                    callBack(map);
+                } catch (error) {
+                    logInfo('Storage', 'error', 'Error parsing storage data:', error);
+                    callBack(new Map());
                 }
-                callBack(jsonToMap(value));
             });
     }
-
 }
 
 //set data to storage
 function setDataInStorage(key, value, callBack) {
-    print('mapKey/value: ' + key + "/" + value);
+    logInfo('Storage', 'info', 'mapKey/value: ' + key + "/" + value);
     var storagePrefs = {};
     storagePrefs[key] = mapToJson(value);
 
@@ -79,6 +135,7 @@ function getMessage(messageKey) {
 
 //add a context menu item
 function createMenuItem(itemProperties, callBack) {
+    logInfo('Menu', 'info', 'Creating menu item', itemProperties);
     menus.create(itemProperties, callBack);
 }
 
@@ -140,9 +197,9 @@ function jsonToMap(jsonStr) {
 */
 function onCreated() {
     if (runtime.lastError) {
-        print(`Error: ${runtime.lastError}`);
+        logInfo('System', 'error', 'Error:', runtime.lastError);
     } else {
-        print("Item created successfully");
+        logInfo('System', 'info', 'Item created successfully');
     }
 }
 
@@ -152,7 +209,7 @@ function onCreated() {
  * We'll just log success here.
 */
 function onSuccess() {
-    print("Url set successfully");
+    logInfo('System', 'info', 'Url set successfully');
 }
 
 /**
@@ -161,7 +218,7 @@ function onSuccess() {
  * We'll just log the error here.
 */
 function onError(error) {
-    print(`Error: ${error}`);
+    logInfo('System', 'error', 'Error:', error);
 }
 
 /**
@@ -169,115 +226,159 @@ function onError(error) {
  * @param {String} message
  */
 function print(message) {
-    console.log(message);
+    logInfo('System', 'info', message);
 }
 
 /**
- * This method will be called when the extension has been loaded for the first time
- *  in current browser session.
+ * Add this function to create menu items
  */
-function initValues() {
-    getDataFromStorage('url_map', function (map) {
-        urlMap = map;
-        console.log('urls from the storage: ' + map);
-        generateMenuItems();
-    });
+function addMenuItem(name, url) {
+    createMenuItem({
+        id: name,
+        title: menuTitlePrefix + " " + name,
+        contexts: contextList,
+    }, onCreated);
 }
 
-
 /**
- * Create all the context menu items.
- * 
-*/
-function generateMenuItems() {
-
-    //check if the in memory urlmap
-    if (urlMap != null
-        && typeof urlMap != 'undefined'
-        && urlMap.size > 0) {
-        print('urlMap:');
-        for (var [key, value] of urlMap) {
-            print(key + ' : ' + value);
-        }
-
-        //iterate over the map and create menu items accordingly
-        for (var [name, url] of urlMap) {
-            createMenuItem({
-                id: name,
-                title: menuTitlePrefix + " " + name,
-                //this will allow the options pop up to be visible 
-                //When user has cursor on a link, a tab or anywhere in the page.
-                //Also When a text selection has been made.
-                contexts: contextList,
-            }, onCreated);
-        }
-    }
+ * Add this function to create the options menu item
+ */
+function addOptionsMenuItem() {
     createMenuItem({
         id: "options",
         title: getMessage("menuTitleOptions"),
-        //this will allow the options pop up to be visible everywhere on the browser. 
         contexts: ["all"]
     }, onCreated);
 }
 
-/*
-The click event listener, where we perform the appropriate action given the
-ID of the menu item that was clicked.
-*/
-addMenuItemClickListener((info, tab) => {
-    var menuItemId = "" + info.menuItemId;
-    if (urlMap != null && urlMap.size > 0) {
-        var url = urlMap.get(menuItemId);
-        if (url != null && typeof url != 'undefined') {
-            send(url, info, tab);
+/**
+ * Modify initContextMenu to initialize urlMap
+ */
+function initContextMenu() {
+    logInfo('System', 'info', 'Initializing context menu');
+    getDataFromStorage(urlMapKey, function (map) {
+        logInfo('Storage', 'info', 'Retrieved map from storage:', map);
+        
+        // Ensure map is valid
+        if (!map || !(map instanceof Map)) {
+            logInfo('System', 'info', 'Creating new Map as retrieved map was invalid');
+            map = new Map();
         }
-    }
+        
+        // Set the global urlMap
+        window.urlMap = map;
+        
+        // Clear existing menus first
+        menus.removeAll(() => {
+            logInfo('Menu', 'info', 'Creating menu items for map:', Array.from(map.entries()));
+            if (map.size > 0) {
+                for (const [name, url] of map) {
+                    addMenuItem(name, url);
+                }
+            }
+            addOptionsMenuItem();
+        });
+    });
+}
 
-    if (menuItemId === "options") {
-        openOptionsPage();
-    }
+// Initialize the extension
+document.addEventListener('DOMContentLoaded', () => {
+    logInfo('System', 'info', 'Extension initialized');
+    // Clear existing menus first
+    menus.removeAll(() => {
+        // Then initialize context menus
+        initContextMenu();
+    });
 });
 
+//redirect user to options page on click of the extension icon.
+addIconClickListener(openOptionsPage);
 
+// Add to storage initialization
+browserAPI.storage.sync.get(null, function(items) {
+    logInfo('Storage', 'info', 'Initial storage state:', items);
+    logInfo('Storage', 'info', 'urlMapKey value:', items[urlMapKey]);
+});
+
+// Add back the click handler and send functions with image support
+addMenuItemClickListener((info, tab) => {
+    logInfo('System', 'info', 'Menu item clicked:', info.menuItemId);
+    logInfo('Storage', 'info', 'Current urlMap:', window.urlMap);
+    logInfo('System', 'info', 'Click info:', info);
+    
+    ensureUrlMap((urlMap) => {
+        var menuItemId = "" + info.menuItemId;
+        if (urlMap && urlMap.size > 0) {
+            var url = urlMap.get(menuItemId);
+            logInfo('Storage', 'info', 'Found URL for menuId:', url);
+            
+            if (url != null && typeof url != 'undefined') {
+                logInfo('System', 'info', 'Sending to URL:', url);
+                logInfo('System', 'info', 'Info object:', info);
+                logInfo('System', 'info', 'Tab object:', tab);
+                send(url, info, tab);
+            } else {
+                logInfo('System', 'warn', 'No URL found for menuId:', menuItemId);
+            }
+        } else {
+            logInfo('System', 'warn', 'urlMap is empty or null:', urlMap);
+        }
+
+        if (menuItemId === "options") {
+            openOptionsPage();
+        }
+    });
+});
 
 /**
  * This method sends given content(tab url, link or selected text) 
  * to given url.
  * 
- * Note: The url must be of the dicord webhook only.
+ * Note: The url must be of the discord webhook only.
  * @param {String} url 
  * @param {TabInfo} info 
  * @param {Tab} tab 
  */
 function send(url, info, tab) {
+    logInfo('Network', 'info', 'Send function called', { url, info, tab });
 
-    //check the content, if it is selected text or a link
-    var data = info.linkUrl != null ? info.linkUrl : info.selectionText;
-    //check if the user has not clicked any link or selected any text
-    data = data || tab.url;
+    let content = '';
+    let embeds = [];
 
-    //create a json from the data
-    var jsonData = JSON.stringify({
-        "content": data,
-        "ttl": false
-    });
+    if (info.mediaType === "image" || (info.srcUrl && info.srcUrl.match(/\.(jpeg|jpg|gif|png)$/i))) {
+        logInfo('Network', 'info', 'Processing image content');
+        embeds.push({
+            image: {
+                url: info.srcUrl
+            }
+        });
+        content = info.linkUrl || info.srcUrl;
+    } else {
+        logInfo('Network', 'info', 'Processing regular content');
+        content = info.linkUrl || info.selectionText || tab.url;
+    }
 
+    const payload = {
+        content: content,
+        embeds: embeds,
+        ttl: false
+    };
+
+    logInfo('Network', 'info', 'Formatted payload:', payload);
+    const jsonData = JSON.stringify(payload);
     
-    //check if the url is for a broadcast
     if (url.includes(URL_SEPARATOR)) {
-        //Get the list of channel for broadcast
-        var channels = url.split(URL_SEPARATOR);
-        var channel;
-        for (channel of channels) {
-            //send the data to channels one by one
+        logInfo('Network', 'info', 'Broadcasting to multiple channels');
+        const channels = url.split(URL_SEPARATOR);
+        logInfo('Network', 'info', 'Target channels:', channels);
+        for (const channel of channels) {
             executeRequest(channel, jsonData);
         }
     } else {
-        //send the data to url
+        logInfo('Network', 'info', 'Sending to single channel:', url);
         executeRequest(url, jsonData);
     }
 }
-
 
 /**
  * This method sends given platform formatted json data 
@@ -287,6 +388,8 @@ function send(url, info, tab) {
  * @param {String} jsonData 
  */
 async function executeRequest(url, jsonData) {
+    logInfo('Network', 'info', 'Executing request', { url, jsonData });
+    
     try {
         const response = await fetch(url, {
             method: 'POST',
@@ -296,15 +399,26 @@ async function executeRequest(url, jsonData) {
             body: jsonData
         });
         const data = await response.text();
-        console.log("Discord Response:", data);
+        logInfo('Network', 'info', 'Discord Response:', data);
         return data;
     } catch (error) {
-        console.error("Error sending to Discord:", error);
+        logInfo('Network', 'error', 'Request failed', {
+            message: error.message,
+            stack: error.stack,
+            url: url,
+            data: jsonData
+        });
     }
 }
 
-
-//listen for the event to start the initial process of the page
-initValues();
-//redirect user to options page on click of the extension icon.
-addIconClickListener(openOptionsPage);
+// Add a function to ensure urlMap is initialized
+function ensureUrlMap(callback) {
+    if (!window.urlMap) {
+        getDataFromStorage(urlMapKey, (map) => {
+            window.urlMap = map;
+            callback(map);
+        });
+    } else {
+        callback(window.urlMap);
+    }
+}

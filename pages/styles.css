@@ -163,3 +163,65 @@ th:last-child, td:last-child {
 .footer a:hover {
     text-decoration: underline;
 }
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.import-export-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.utility-button {
+    padding: 8px 16px;
+    font-size: 0.9em;
+    background-color: var(--md-sys-color-surface-container);
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--md-sys-color-primary);
+}
+
+.utility-button:hover {
+    background-color: #e8eaf0;
+    border-color: var(--md-sys-color-primary);
+}
+
+.save-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    padding: 12px 24px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    animation: fadeInOut 2s ease-in-out;
+    z-index: 1000;
+}
+
+@keyframes fadeInOut {
+    0% { opacity: 0; transform: translateY(-20px); }
+    15% { opacity: 1; transform: translateY(0); }
+    85% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-20px); }
+}
+
+.primary-button {
+    font-size: 16px;
+    padding: 12px 32px;
+    min-width: 160px;
+    background: var(--md-sys-color-primary);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.primary-button:hover {
+    background: #007ab3;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transform: translateY(-1px);
+}

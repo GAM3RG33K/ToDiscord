@@ -9,7 +9,15 @@
 
 <body>
     <div class="container">
-        <h3>Settings</h3>
+        <div class="header-container">
+            <h3>Settings</h3>
+            <div class="import-export-buttons">
+                <button id="btn_clean_all" class="utility-button" title="Remove all channels">Clear All</button>
+                <button id="btn_export" class="utility-button" title="Export channels to JSON file">Export</button>
+                <button id="btn_import" class="utility-button" title="Import channels from JSON file">Import</button>
+                <input type="file" id="file_import" accept=".json" style="display: none;">
+            </div>
+        </div>
         <div class="table-container">
             <table id="channels_table">
                 <thead>
@@ -25,10 +33,7 @@
         
         <div class="button-container">
             <button id="btn_add" class="input-buttons">Add Discord Channel</button>
-            <div class="action-buttons">
-                <button id="btn_save" class="input-buttons">Save</button>
-                <button id="btn_clean_all" class="input-buttons">Clear all</button>
-            </div>
+            <button id="btn_save" class="input-buttons primary-button">Save</button>
         </div>
     </div>
     <div class="info">

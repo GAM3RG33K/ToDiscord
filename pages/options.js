@@ -139,14 +139,48 @@ function initPreference() {
 /**
  * Store the provided map in the storage
  * @param {Map} map 
+ * @param {boolean} closeAfterSave - Whether to close the window after saving
  */
-function storeMap(map) {
+function storeMap(map, closeAfterSave = false) {
     //store the urls in storage
     setDataInStorage(urlMapKey, map, function () {
         console.log('values updated!! ' + map);
 
-        //reload the extension to apply the changes made by user.
-        runtime.reload();
+        // Clear existing table rows except header
+        while (listView.firstChild) {
+            listView.removeChild(listView.firstChild);
+        }
+        
+        // Reset count before updating UI
+        count = 0;
+        
+        // Update the UI with new data
+        updateUI(map);
+        
+        // Notify user of successful update
+        const notification = document.createElement('div');
+        notification.textContent = 'Settings saved successfully!';
+        notification.className = 'save-notification';
+        document.body.appendChild(notification);
+        
+        // Update context menus without full extension reload
+        if (isChrome) {
+            chrome.runtime.sendMessage({ action: "updateContextMenus" });
+        } else {
+            browser.runtime.sendMessage({ action: "updateContextMenus" });
+        }
+
+        if (closeAfterSave) {
+            // Close the options page after a short delay
+            setTimeout(() => {
+                window.close();
+            }, 1000); // Wait 1 second to show the success notification before closing
+        } else {
+            // Remove notification after 2 seconds if not closing
+            setTimeout(() => {
+                notification.remove();
+            }, 2000);
+        }
     });
 }
 
@@ -295,7 +329,51 @@ function saveUrls() {
             urlMap.set(name, url);
         }
     }
-    storeMap(urlMap);
+    storeMap(urlMap, true); // Pass true to close window after save
+}
+
+// Add these functions after your existing code but before the DOMContentLoaded event listener
+
+function exportChannels() {
+    const exportData = mapToJson(urlMap);
+    const blob = new Blob([exportData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create datetime string in format YYYY-MM-DD-HH-mm-ss
+    const now = new Date();
+    const datetime = now.toISOString()
+        .replace(/[:.]/g, '-')  // Replace colons and dots with hyphens
+        .replace('T', '-')      // Replace T with hyphen
+        .slice(0, 19);          // Take only the datetime part, removing milliseconds and Z
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `to-discord-export-${datetime}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+async function importChannels(file) {
+    try {
+        const text = await file.text();
+        const importedMap = jsonToMap(text);
+        
+        // Merge with existing channels or replace them
+        for (const [name, url] of importedMap) {
+            urlMap.set(name, url);
+        }
+        
+        // Update UI and save without closing
+        updateUI(urlMap);
+        storeMap(urlMap, false);
+        
+        alert('Channels imported successfully!');
+    } catch (error) {
+        console.error('Error importing channels:', error);
+        alert('Error importing channels. Please check the file format.');
+    }
 }
 
 // Move initialization into DOMContentLoaded
@@ -317,6 +395,28 @@ document.addEventListener("DOMContentLoaded", function() {
     
     if (saveButton) {
         saveButton.addEventListener("click", saveUrls);
+    }
+
+    const exportButton = document.querySelector('#btn_export');
+    const importButton = document.querySelector('#btn_import');
+    const fileInput = document.querySelector('#file_import');
+
+    if (exportButton) {
+        exportButton.addEventListener('click', exportChannels);
+    }
+
+    if (importButton) {
+        importButton.addEventListener('click', () => {
+            fileInput.click();
+        });
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                importChannels(e.target.files[0]);
+            }
+        });
     }
 
     // Start the initial process
