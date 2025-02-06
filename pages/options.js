@@ -1,3 +1,5 @@
+console.log('options.js loaded');
+
 function isChromeBrowser() {
     var objAgent = navigator.userAgent
     if(objAgent.indexOf("Chrome") !=-1){
@@ -6,26 +8,19 @@ function isChromeBrowser() {
         return false;
     }
 }
+
+// Keep these as module-level variables
 const isChrome = isChromeBrowser();
 const browserAPI = isChrome ? chrome : browser;
 const runtime = browserAPI.runtime;
 const storage = browserAPI.storage;
 
-//the list view element in the page
-const listView = document.querySelector('#div_url_list');
-//the button to add a url field
-const addUrlButton = document.querySelector('#btn_add');
-//the button which clears all the saved url
-const clearAllButton = document.querySelector('#btn_clean_all');
-//the button which saves the urls in the list in the storage
-const saveButton = document.querySelector('#btn_save');
-
-//this count helps access and maintain order of the visible elements which contains urls
-var count = 0;
-
-
+// Move these variables inside DOMContentLoaded
+let listView, addUrlButton, clearAllButton, saveButton;
+let count = 0;
 const urlMapKey = 'url_map';
-var urlMap;
+let urlMap;
+
 /**
  * 
  * Methods for accessing browser APIs
@@ -243,11 +238,23 @@ function generateSpanElement(count, name, url) {
  * @param {String} url 
  */
 function addUrlSpan(name, url) {
-    var span = generateSpanElement(count, name, url);
-    var listItem = document.createElement('li');
-    listItem.appendChild(span);
-    listView.appendChild(listItem);
-    count++
+    const tr = document.createElement('tr');
+    tr.id = "tr_" + count; // Add an ID to the row for easier manipulation
+
+    const tdName = document.createElement('td');
+    const nameInput = generateNameInputElement(count, name);
+    tdName.appendChild(nameInput);
+
+    const tdUrl = document.createElement('td');
+    const urlInput = generateURLInputElement(count, url);
+    tdUrl.appendChild(urlInput);
+
+    tr.appendChild(tdName);
+    tr.appendChild(tdUrl);
+
+    document.getElementById('div_url_list').appendChild(tr);
+    console.log("Added row: ", tr); // Debug log
+    count++; // Increment count *after* adding the row
 }
 
 /**
@@ -256,6 +263,7 @@ function addUrlSpan(name, url) {
  * this will be called only when user clicks to add url button
  */
 function addEmptySpan() {
+    console.log("addEmptySpan called"); // Debug log
     addUrlSpan('', '');
 }
 
@@ -266,21 +274,18 @@ function addEmptySpan() {
  * @param {Map} urlMap 
  */
 function updateUI(urlMap) {
-    var list = listView.children;
-
-    for (var i = 0; i < list.length; i++) {
-        listView.removeChild(list[i]);
-    }
+    const tbody = document.getElementById('div_url_list');
+    // tbody.innerHTML = ''; // Clear existing rows - REMOVE THIS LINE
 
     if (urlMap.size > 0) {
         for (var [name, url] of urlMap) {
             addUrlSpan(name, url);
         }
-
-        // } else {
-        //     addUrlSpan('', '');
     }
-    addUrlSpan('', '');
+    // Always add an empty span for new input
+    if (tbody.children.length === 0) {
+        addEmptySpan();
+    }
 }
 
 /**
@@ -306,14 +311,18 @@ function clearUrls() {
  * in the storage
  */
 function saveUrls() {
-    var spans = listView.children;
+    var rows = listView.getElementsByTagName('tr'); // Get table rows
 
     var urlMap = new Map();
 
-    for (var i = 0; i < spans.length; i++) {
-        var span = spans[i].children[0];
-        var name = span.children[0].value;
-        var url = span.children[1].value;
+    for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var nameInput = row.cells[0].querySelector('input'); // Access input in first cell
+        var urlInput = row.cells[1].querySelector('input');   // Access input in second cell
+
+        var name = nameInput.value;
+        var url = urlInput.value;
+
         if (!isEmpty(name) && !isEmpty(url)) {
             urlMap.set(name, url);
         }
@@ -321,13 +330,47 @@ function saveUrls() {
     storeMap(urlMap);
 }
 
+// Move initialization into DOMContentLoaded
+document.addEventListener("DOMContentLoaded", function() {
+    // Initialize DOM element references with correct IDs
+    listView = document.querySelector('#div_url_list');
+    addUrlButton = document.querySelector('#btn_add');
+    clearAllButton = document.querySelector('#btn_clean_all'); // Make sure this ID matches HTML
+    saveButton = document.querySelector('#btn_save');
 
-//listen for the event to start the initial process of the page
-document.addEventListener("DOMContentLoaded", initPreference);
+    console.log('DOM Elements found:', {
+        listView,
+        addUrlButton,
+        clearAllButton,
+        saveButton
+    });
 
-//add url button reference from the UI
-addUrlButton.addEventListener("click", addEmptySpan);
-//clear all the url button reference from the UI
-clearAllButton.addEventListener("click", clearUrls);
-//save all the url button reference from the UI
-saveButton.addEventListener("click", saveUrls);
+    // Add debug logging to see what we're finding
+    console.log('Button IDs found:', {
+        addButtonId: addUrlButton?.id,
+        clearButtonId: clearAllButton?.id,
+        saveButtonId: saveButton?.id
+    });
+
+    // Only add event listeners if elements exist
+    if (addUrlButton) {
+        addUrlButton.addEventListener("click", addEmptySpan);
+    } else {
+        console.error('Add button not found with selector #btn_add');
+    }
+    
+    if (clearAllButton) {
+        clearAllButton.addEventListener("click", clearUrls);
+    } else {
+        console.error('Clear button not found with selector #btn_clean_all');
+    }
+    
+    if (saveButton) {
+        saveButton.addEventListener("click", saveUrls);
+    } else {
+        console.error('Save button not found with selector #btn_save');
+    }
+
+    // Start the initial process
+    initPreference();
+});

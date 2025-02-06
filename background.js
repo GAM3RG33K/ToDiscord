@@ -11,7 +11,7 @@ const browserAPI = isChrome ? chrome : browser;
 const menus = isChrome ? browserAPI.contextMenus : browserAPI.menus;
 const runtime = browserAPI.runtime;
 const storage = browserAPI.storage;
-const browserAction = browserAPI.browserAction;
+const action = browserAPI.action;
 const i18n = browserAPI.i18n;
 const contextList = isChrome ? ["link", "selection", "page", "image", "video", "audio",]
     : ["link", "selection", "page", "tab", "image", "video", "audio",];
@@ -89,7 +89,7 @@ function addMenuItemClickListener(callBack) {
 
 // add click listener for extension icon on tool bar
 function addIconClickListener(callBack) {
-    browserAction.onClicked.addListener(callBack);
+    action.onClicked.addListener(callBack);
 }
 
 
@@ -286,22 +286,25 @@ function send(url, info, tab) {
  * @param {String} url 
  * @param {String} jsonData 
  */
-function executeRequest(url, jsonData) {
-    print('discord url: ' + url);
-    //send request to discord webhook
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", url, true);
-    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-    xhr.send(jsonData);
-
-    //read and log the response
-    var response = xhr.response;
-    print("Discord Response: " + response);
-    return response;
+async function executeRequest(url, jsonData) {
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json;charset=UTF-8'
+            },
+            body: jsonData
+        });
+        const data = await response.text();
+        console.log("Discord Response:", data);
+        return data;
+    } catch (error) {
+        console.error("Error sending to Discord:", error);
+    }
 }
 
 
 //listen for the event to start the initial process of the page
-document.addEventListener("DOMContentLoaded", initValues);
+initValues();
 //redirect user to options page on click of the extension icon.
 addIconClickListener(openOptionsPage);
