@@ -1,4 +1,4 @@
-console.log('options.js loaded');
+// Remove initial console log
 
 function isChromeBrowser() {
     var objAgent = navigator.userAgent
@@ -29,7 +29,6 @@ let urlMap;
 
 //get data from the storage
 function getDataFromStorage(key, callBack) {
-    print('get key: ' + key);
     if (isChrome) {
         storage.sync.get(null, 
             function (storagePrefs) {								 
@@ -49,12 +48,10 @@ function getDataFromStorage(key, callBack) {
                 callBack(jsonToMap(value));
             });
     }
-
 }
 
 //set data to storage
 function setDataInStorage(key, value, callBack) {
-    print('mapKey/value: ' + key + "/" + value);
     var storagePrefs = {};
     storagePrefs[key] = mapToJson(value);
 
@@ -67,7 +64,6 @@ function setDataInStorage(key, value, callBack) {
             });
     }
 }
-
 
 /**
  * Utility methods with pure javascript code
@@ -102,8 +98,6 @@ function isEmpty(string) {
     return (string.length === 0 || !string.trim());
 }
 
-
-
 /**
  * Call back methods for logging	
  */
@@ -114,7 +108,7 @@ function isEmpty(string) {
  * We'll just log the error here.
 */
 function onError(error) {
-    print(`Error: ${error}`);
+    console.error(`Error: ${error}`);
 }
 
 /**
@@ -133,34 +127,20 @@ function print(message) {
 function initPreference() {
     getDataFromStorage(urlMapKey, function (map) {
         {
-
             urlMap = map;
-            if (urlMap == null
-                || urlMap.size == 0) {
-                print('nothing in storage, adding current map!');
+            if (urlMap == null || urlMap.size == 0) {
                 urlMap = new Map();
-                // storeMap(urlMap);
-            } else {
-                print('storage.urlMap => ');
-                for (var [key, value] of urlMap) {
-                    print('\n' + key + ' : ' + value);
-                }
             }
-
-            //update UI based on the urlMap that was fetched from the storage
             updateUI(urlMap);
         }
-
     });
 }
-
 
 /**
  * Store the provided map in the storage
  * @param {Map} map 
  */
 function storeMap(map) {
-
     //store the urls in storage
     setDataInStorage(urlMapKey, map, function () {
         console.log('values updated!! ' + map);
@@ -169,8 +149,6 @@ function storeMap(map) {
         runtime.reload();
     });
 }
-
-
 
 /**
  * This method generates and returns an Input field with
@@ -188,7 +166,6 @@ function generateURLInputElement(count, url) {
     urlInput.setAttribute('value', "" + url);
     return urlInput;
 }
-
 
 /**
  * This method generates and returns an Input field with
@@ -239,7 +216,7 @@ function generateSpanElement(count, name, url) {
  */
 function addUrlSpan(name, url) {
     const tr = document.createElement('tr');
-    tr.id = "tr_" + count; // Add an ID to the row for easier manipulation
+    tr.id = "tr_" + count;
 
     const tdName = document.createElement('td');
     const nameInput = generateNameInputElement(count, name);
@@ -253,8 +230,7 @@ function addUrlSpan(name, url) {
     tr.appendChild(tdUrl);
 
     document.getElementById('div_url_list').appendChild(tr);
-    console.log("Added row: ", tr); // Debug log
-    count++; // Increment count *after* adding the row
+    count++;
 }
 
 /**
@@ -263,7 +239,6 @@ function addUrlSpan(name, url) {
  * this will be called only when user clicks to add url button
  */
 function addEmptySpan() {
-    console.log("addEmptySpan called"); // Debug log
     addUrlSpan('', '');
 }
 
@@ -275,7 +250,6 @@ function addEmptySpan() {
  */
 function updateUI(urlMap) {
     const tbody = document.getElementById('div_url_list');
-    // tbody.innerHTML = ''; // Clear existing rows - REMOVE THIS LINE
 
     if (urlMap.size > 0) {
         for (var [name, url] of urlMap) {
@@ -294,16 +268,10 @@ function updateUI(urlMap) {
 function clearUrls() {
     if (urlMap == null) {
         return;
-    } else {
-        print('clearing storage.urlMap => ');
-        for (var [key, value] of urlMap) {
-            print('\n' + key + ' : ' + value);
-        }
     }
     urlMap.clear();
     updateUI(urlMap);
     storeMap(urlMap);
-
 }
 
 /**
@@ -332,43 +300,23 @@ function saveUrls() {
 
 // Move initialization into DOMContentLoaded
 document.addEventListener("DOMContentLoaded", function() {
-    // Initialize DOM element references with correct IDs
+    // Initialize DOM element references
     listView = document.querySelector('#div_url_list');
     addUrlButton = document.querySelector('#btn_add');
-    clearAllButton = document.querySelector('#btn_clean_all'); // Make sure this ID matches HTML
+    clearAllButton = document.querySelector('#btn_clean_all');
     saveButton = document.querySelector('#btn_save');
-
-    console.log('DOM Elements found:', {
-        listView,
-        addUrlButton,
-        clearAllButton,
-        saveButton
-    });
-
-    // Add debug logging to see what we're finding
-    console.log('Button IDs found:', {
-        addButtonId: addUrlButton?.id,
-        clearButtonId: clearAllButton?.id,
-        saveButtonId: saveButton?.id
-    });
 
     // Only add event listeners if elements exist
     if (addUrlButton) {
         addUrlButton.addEventListener("click", addEmptySpan);
-    } else {
-        console.error('Add button not found with selector #btn_add');
     }
     
     if (clearAllButton) {
         clearAllButton.addEventListener("click", clearUrls);
-    } else {
-        console.error('Clear button not found with selector #btn_clean_all');
     }
     
     if (saveButton) {
         saveButton.addEventListener("click", saveUrls);
-    } else {
-        console.error('Save button not found with selector #btn_save');
     }
 
     // Start the initial process

@@ -141,3 +141,25 @@ th:last-child, td:last-child {
 .info a:hover {
   text-decoration: underline;
 }
+
+.footer {
+    background: white;
+    padding: 16px 32px;
+    text-align: center;
+    border-top: 1px solid var(--md-sys-color-outline);
+    margin-top: auto;
+}
+
+.footer p {
+    margin: 8px 0;
+    color: var(--md-sys-color-primary);
+}
+
+.footer a {
+    color: var(--md-sys-color-primary);
+    text-decoration: none;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
