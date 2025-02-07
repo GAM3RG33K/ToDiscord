@@ -10,11 +10,7 @@ A browser extension for sending content to Discord Channels via WebHooks. Compat
 ## Features:
 
 ### Content Sharing
-* **Firefox Support**: 
-    * Selected Text
-    * Hyperlinks (Images, videos, search results, etc.)
-    * Current Tab URL
-* **Chrome Support**: 
+* **Extension Supports**: 
     * Selected Text
     * Hyperlinks (Images, videos, search results, etc.)
     * Current Tab URL
