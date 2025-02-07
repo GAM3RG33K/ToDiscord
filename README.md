@@ -40,14 +40,14 @@ A browser extension for sending content to Discord Channels via WebHooks. Compat
 
 ## Screenshots:
 *Firefox*
-![](/images/to_discord_firefox_settings.PNG?raw=true)
+![](/images/extensions_settings.png?raw=true)
 ![](/images/to_discord_firefox_share_demo.PNG?raw=true)
 ![](/images/to_discord_firefox_shared_content.PNG?raw=true)
 ![](/images/to_discord_firefox_share_demo2.PNG?raw=true)
 ![](/images/to_discord_firefox_shared_content2.PNG?raw=true)
 
 *Chrome*
-![](/images/to_discord_chrome_settings.jpg?raw=true)
+![](/images/extensions_settings.png?raw=true)
 ![](/images/to_discord_chrome_share_demo.jpg?raw=true)
 ![](/images/to_discord_chrome_shared_content.jpg?raw=true)
 
