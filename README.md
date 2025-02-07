@@ -4,8 +4,8 @@ A browser extension for sending content to Discord Channels via WebHooks. Compat
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ## Download Extension:
-[![](https://addons.cdn.mozilla.net/static/img/addons-buttons/AMO-button_1.png)](https://addons.mozilla.org/en-US/firefox/addon/to-discord/)
-[![](https://developer.chrome.com/webstore/images/ChromeWebStore_Badge_v2_206x58.png)](https://chrome.google.com/webstore/detail/to-discord/epcihifbffodmnbbnjgancnlodhbkhcl)
+[Firefox](https://addons.mozilla.org/en-US/firefox/addon/to-discord/)
+[Chrome](https://chrome.google.com/webstore/detail/to-discord/epcihifbffodmnbbnjgancnlodhbkhcl)
     
 ## Features:
 
