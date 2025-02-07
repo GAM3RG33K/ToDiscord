@@ -1,3 +1,5 @@
+// Remove initial console log
+
 function isChromeBrowser() {
     var objAgent = navigator.userAgent
     if(objAgent.indexOf("Chrome") !=-1){
@@ -6,26 +8,19 @@ function isChromeBrowser() {
         return false;
     }
 }
+
+// Keep these as module-level variables
 const isChrome = isChromeBrowser();
 const browserAPI = isChrome ? chrome : browser;
 const runtime = browserAPI.runtime;
 const storage = browserAPI.storage;
 
-//the list view element in the page
-const listView = document.querySelector('#div_url_list');
-//the button to add a url field
-const addUrlButton = document.querySelector('#btn_add');
-//the button which clears all the saved url
-const clearAllButton = document.querySelector('#btn_clean_all');
-//the button which saves the urls in the list in the storage
-const saveButton = document.querySelector('#btn_save');
-
-//this count helps access and maintain order of the visible elements which contains urls
-var count = 0;
-
-
+// Move these variables inside DOMContentLoaded
+let listView, addUrlButton, clearAllButton, saveButton;
+let count = 0;
 const urlMapKey = 'url_map';
-var urlMap;
+let urlMap;
+
 /**
  * 
  * Methods for accessing browser APIs
@@ -34,7 +29,6 @@ var urlMap;
 
 //get data from the storage
 function getDataFromStorage(key, callBack) {
-    print('get key: ' + key);
     if (isChrome) {
         storage.sync.get(null, 
             function (storagePrefs) {								 
@@ -54,12 +48,10 @@ function getDataFromStorage(key, callBack) {
                 callBack(jsonToMap(value));
             });
     }
-
 }
 
 //set data to storage
 function setDataInStorage(key, value, callBack) {
-    print('mapKey/value: ' + key + "/" + value);
     var storagePrefs = {};
     storagePrefs[key] = mapToJson(value);
 
@@ -72,7 +64,6 @@ function setDataInStorage(key, value, callBack) {
             });
     }
 }
-
 
 /**
  * Utility methods with pure javascript code
@@ -107,8 +98,6 @@ function isEmpty(string) {
     return (string.length === 0 || !string.trim());
 }
 
-
-
 /**
  * Call back methods for logging	
  */
@@ -119,7 +108,7 @@ function isEmpty(string) {
  * We'll just log the error here.
 */
 function onError(error) {
-    print(`Error: ${error}`);
+    console.error(`Error: ${error}`);
 }
 
 /**
@@ -138,44 +127,62 @@ function print(message) {
 function initPreference() {
     getDataFromStorage(urlMapKey, function (map) {
         {
-
             urlMap = map;
-            if (urlMap == null
-                || urlMap.size == 0) {
-                print('nothing in storage, adding current map!');
+            if (urlMap == null || urlMap.size == 0) {
                 urlMap = new Map();
-                // storeMap(urlMap);
-            } else {
-                print('storage.urlMap => ');
-                for (var [key, value] of urlMap) {
-                    print('\n' + key + ' : ' + value);
-                }
             }
-
-            //update UI based on the urlMap that was fetched from the storage
             updateUI(urlMap);
         }
-
     });
 }
-
 
 /**
  * Store the provided map in the storage
  * @param {Map} map 
+ * @param {boolean} closeAfterSave - Whether to close the window after saving
  */
-function storeMap(map) {
-
+function storeMap(map, closeAfterSave = false) {
     //store the urls in storage
     setDataInStorage(urlMapKey, map, function () {
         console.log('values updated!! ' + map);
 
-        //reload the extension to apply the changes made by user.
-        runtime.reload();
+        // Clear existing table rows except header
+        while (listView.firstChild) {
+            listView.removeChild(listView.firstChild);
+        }
+        
+        // Reset count before updating UI
+        count = 0;
+        
+        // Update the UI with new data
+        updateUI(map);
+        
+        // Notify user of successful update
+        const notification = document.createElement('div');
+        notification.textContent = 'Settings saved successfully!';
+        notification.className = 'save-notification';
+        document.body.appendChild(notification);
+        
+        // Update context menus without full extension reload
+        if (isChrome) {
+            chrome.runtime.sendMessage({ action: "updateContextMenus" });
+        } else {
+            browser.runtime.sendMessage({ action: "updateContextMenus" });
+        }
+
+        if (closeAfterSave) {
+            // Close the options page after a short delay
+            setTimeout(() => {
+                window.close();
+            }, 1000); // Wait 1 second to show the success notification before closing
+        } else {
+            // Remove notification after 2 seconds if not closing
+            setTimeout(() => {
+                notification.remove();
+            }, 2000);
+        }
     });
 }
-
-
 
 /**
  * This method generates and returns an Input field with
@@ -193,7 +200,6 @@ function generateURLInputElement(count, url) {
     urlInput.setAttribute('value', "" + url);
     return urlInput;
 }
-
 
 /**
  * This method generates and returns an Input field with
@@ -243,11 +249,22 @@ function generateSpanElement(count, name, url) {
  * @param {String} url 
  */
 function addUrlSpan(name, url) {
-    var span = generateSpanElement(count, name, url);
-    var listItem = document.createElement('li');
-    listItem.appendChild(span);
-    listView.appendChild(listItem);
-    count++
+    const tr = document.createElement('tr');
+    tr.id = "tr_" + count;
+
+    const tdName = document.createElement('td');
+    const nameInput = generateNameInputElement(count, name);
+    tdName.appendChild(nameInput);
+
+    const tdUrl = document.createElement('td');
+    const urlInput = generateURLInputElement(count, url);
+    tdUrl.appendChild(urlInput);
+
+    tr.appendChild(tdName);
+    tr.appendChild(tdUrl);
+
+    document.getElementById('div_url_list').appendChild(tr);
+    count++;
 }
 
 /**
@@ -266,21 +283,17 @@ function addEmptySpan() {
  * @param {Map} urlMap 
  */
 function updateUI(urlMap) {
-    var list = listView.children;
-
-    for (var i = 0; i < list.length; i++) {
-        listView.removeChild(list[i]);
-    }
+    const tbody = document.getElementById('div_url_list');
 
     if (urlMap.size > 0) {
         for (var [name, url] of urlMap) {
             addUrlSpan(name, url);
         }
-
-        // } else {
-        //     addUrlSpan('', '');
     }
-    addUrlSpan('', '');
+    // Always add an empty span for new input
+    if (tbody.children.length === 0) {
+        addEmptySpan();
+    }
 }
 
 /**
@@ -289,16 +302,10 @@ function updateUI(urlMap) {
 function clearUrls() {
     if (urlMap == null) {
         return;
-    } else {
-        print('clearing storage.urlMap => ');
-        for (var [key, value] of urlMap) {
-            print('\n' + key + ' : ' + value);
-        }
     }
     urlMap.clear();
     updateUI(urlMap);
     storeMap(urlMap);
-
 }
 
 /**
@@ -306,28 +313,112 @@ function clearUrls() {
  * in the storage
  */
 function saveUrls() {
-    var spans = listView.children;
+    var rows = listView.getElementsByTagName('tr'); // Get table rows
 
     var urlMap = new Map();
 
-    for (var i = 0; i < spans.length; i++) {
-        var span = spans[i].children[0];
-        var name = span.children[0].value;
-        var url = span.children[1].value;
+    for (var i = 0; i < rows.length; i++) {
+        var row = rows[i];
+        var nameInput = row.cells[0].querySelector('input'); // Access input in first cell
+        var urlInput = row.cells[1].querySelector('input');   // Access input in second cell
+
+        var name = nameInput.value;
+        var url = urlInput.value;
+
         if (!isEmpty(name) && !isEmpty(url)) {
             urlMap.set(name, url);
         }
     }
-    storeMap(urlMap);
+    storeMap(urlMap, true); // Pass true to close window after save
 }
 
+// Add these functions after your existing code but before the DOMContentLoaded event listener
 
-//listen for the event to start the initial process of the page
-document.addEventListener("DOMContentLoaded", initPreference);
+function exportChannels() {
+    const exportData = mapToJson(urlMap);
+    const blob = new Blob([exportData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create datetime string in format YYYY-MM-DD-HH-mm-ss
+    const now = new Date();
+    const datetime = now.toISOString()
+        .replace(/[:.]/g, '-')  // Replace colons and dots with hyphens
+        .replace('T', '-')      // Replace T with hyphen
+        .slice(0, 19);          // Take only the datetime part, removing milliseconds and Z
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `to-discord-export-${datetime}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
 
-//add url button reference from the UI
-addUrlButton.addEventListener("click", addEmptySpan);
-//clear all the url button reference from the UI
-clearAllButton.addEventListener("click", clearUrls);
-//save all the url button reference from the UI
-saveButton.addEventListener("click", saveUrls);
+async function importChannels(file) {
+    try {
+        const text = await file.text();
+        const importedMap = jsonToMap(text);
+        
+        // Merge with existing channels or replace them
+        for (const [name, url] of importedMap) {
+            urlMap.set(name, url);
+        }
+        
+        // Update UI and save without closing
+        updateUI(urlMap);
+        storeMap(urlMap, false);
+        
+        alert('Channels imported successfully!');
+    } catch (error) {
+        console.error('Error importing channels:', error);
+        alert('Error importing channels. Please check the file format.');
+    }
+}
+
+// Move initialization into DOMContentLoaded
+document.addEventListener("DOMContentLoaded", function() {
+    // Initialize DOM element references
+    listView = document.querySelector('#div_url_list');
+    addUrlButton = document.querySelector('#btn_add');
+    clearAllButton = document.querySelector('#btn_clean_all');
+    saveButton = document.querySelector('#btn_save');
+
+    // Only add event listeners if elements exist
+    if (addUrlButton) {
+        addUrlButton.addEventListener("click", addEmptySpan);
+    }
+    
+    if (clearAllButton) {
+        clearAllButton.addEventListener("click", clearUrls);
+    }
+    
+    if (saveButton) {
+        saveButton.addEventListener("click", saveUrls);
+    }
+
+    const exportButton = document.querySelector('#btn_export');
+    const importButton = document.querySelector('#btn_import');
+    const fileInput = document.querySelector('#file_import');
+
+    if (exportButton) {
+        exportButton.addEventListener('click', exportChannels);
+    }
+
+    if (importButton) {
+        importButton.addEventListener('click', () => {
+            fileInput.click();
+        });
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                importChannels(e.target.files[0]);
+            }
+        });
+    }
+
+    // Start the initial process
+    initPreference();
+});

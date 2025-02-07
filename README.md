@@ -1,5 +1,5 @@
 # ToDiscord
-This is a browser extension for sending content to a Discord Channel's WebHook.
+A browser extension for sending content to Discord Channels via WebHooks. Compatible with Manifest V3.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
@@ -7,38 +7,54 @@ This is a browser extension for sending content to a Discord Channel's WebHook.
 [![](https://addons.cdn.mozilla.net/static/img/addons-buttons/AMO-button_1.png)](https://addons.mozilla.org/en-US/firefox/addon/to-discord/)
 [![](https://developer.chrome.com/webstore/images/ChromeWebStore_Badge_v2_206x58.png)](https://chrome.google.com/webstore/detail/to-discord/epcihifbffodmnbbnjgancnlodhbkhcl)
     
-## Content Share Support on Browsers:
- * Firefox: 
-    * Selected Text
-    * Hyper Links \[Image, video, search result, etc\]
-    * browser tab's url
+## Features:
 
- * Chrome: 
+### Content Sharing
+* **Firefox Support**: 
     * Selected Text
-    * Hyper Links \[Image, video, search result, etc\]
+    * Hyperlinks (Images, videos, search results, etc.)
+    * Current Tab URL
+* **Chrome Support**: 
+    * Selected Text
+    * Hyperlinks (Images, videos, search results, etc.)
+    * Current Tab URL
 
-## Additional Features:
- * Easy to use interface to add new discord channels
- * Channel Synchronization for logged in browser 
-   (Add channel using one logged in device and use it in other logged in devices)
-   
-   **Note: Requires browser login to firefox/chrome**
- * Choice for Multiple channels to send content to (Check right-click menu for options)
- * Support for broadcast to multiple channels by combining the channel urls with ';'.   
+### Channel Management
+* Modern, easy-to-use interface for managing Discord webhooks
+* Cross-device channel synchronization (requires browser login)
+* Multiple channel support with right-click context menu
+* Broadcast support - send to multiple channels simultaneously using ';' separator
+* Import/Export your channels via json (Check Options page)
+
+### Technical Features
+* Manifest V3 compatible
+* Secure storage using browser.storage.sync API
+* Modern async/await implementation for API calls
+* Cross-browser compatibility (Chrome & Firefox)
+
+## Usage
+1. Add your Discord webhook URL(s) in the extension settings
+2. Right-click on any content you want to share
+3. Select your target Discord channel from the context menu
+4. Content will be instantly shared to your Discord channel
 
 ## Screenshots:
- *Firefox*
- ![](/images/to_discord_firefox_settings.PNG?raw=true)
- ![](/images/to_discord_firefox_share_demo.PNG?raw=true)
- ![](/images/to_discord_firefox_shared_content.PNG?raw=true)
- ![](/images/to_discord_firefox_share_demo2.PNG?raw=true)
- ![](/images/to_discord_firefox_shared_content2.PNG?raw=true)
- 
- *Chrome*
- ![](/images/to_discord_chrome_settings.jpg?raw=true)
- ![](/images/to_discord_chrome_share_demo.jpg?raw=true)
- ![](/images/to_discord_chrome_shared_content.jpg?raw=true)
+*Firefox*
+![](/images/extensions_settings.png?raw=true)
+![](/images/to_discord_firefox_share_demo.PNG?raw=true)
+![](/images/to_discord_firefox_shared_content.PNG?raw=true)
+![](/images/to_discord_firefox_share_demo2.PNG?raw=true)
+![](/images/to_discord_firefox_shared_content2.PNG?raw=true)
 
+*Chrome*
+![](/images/extensions_settings.png?raw=true)
+![](/images/to_discord_chrome_share_demo.jpg?raw=true)
+![](/images/to_discord_chrome_shared_content.jpg?raw=true)
+
+## Privacy & Security
+* No data collection
+* All webhook URLs are stored locally in your browser
+* Synchronization only occurs through your browser's built-in sync feature
 
 **Special Note**: Discord icon used here is from [Discord Branding](https://discordapp.com/branding).
-Thanks discord team for allowing me to use it.
+Thanks to the Discord team for allowing its use.
